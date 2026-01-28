@@ -1,14 +1,97 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Secure Login</title>
+    <title>Secure Access</title>
+    <style>
+        body {
+            background: #020617;
+            color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 90vh;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .login {
+            background: #111827;
+            padding: 24px;
+            border-radius: 8px;
+            width: 500px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            outline: none;
+            border: none;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #2563eb;
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 4px;
+        }
+
+        h3 {
+            margin-top: 0;
+            font-weight: 600;
+        }
+    </style>
 </head>
+
 <body>
-    <h2>Adaptive eBPF Forensics Login</h2>
-    <form method="POST">
-        <input type="text" name="username" placeholder="Username" required><br><br>
-        <input type="password" name="password" placeholder="Password" required><br><br>
-        <button type="submit">Login</button>
-    </form>
+
+    <div class="login">
+        <h3>Adaptive eBPF Forensics Login System</h3>
+        {% if error %}
+        <div class="alert alert-error" style="color:red">
+            {{ error }}
+        </div>
+        <br>
+        {% endif %}
+
+        <form method="POST">
+            <input name="username" placeholder="Username" autocomplete="off" autocorrect="off" spellcheck="false"
+                onkeydown="switchpwd()" required>
+            <input type="password" name="password" placeholder="Password" autocomplete="off" autocorrect="off"
+                spellcheck="false" required>
+            <button>Authenticate</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("keydown", function (e) {
+            const username = document.querySelector("input[name='username']");
+            const password = document.querySelector("input[name='password']");
+
+            if (!username || !password) return;
+
+            if (e.key === "ArrowDown" && document.activeElement === username) {
+                password.focus();
+                e.preventDefault();
+            }
+
+            if (e.key === "ArrowUp" && document.activeElement === password) {
+                username.focus();
+                e.preventDefault();
+            }
+
+            if (e.key === "Enter" && document.activeElement === password) {
+                password.form.submit();
+            }
+        });
+    </script>
+
+
 </body>
+
 </html>

@@ -2,6 +2,7 @@ import time
 import random
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 PROCESSES = ["ssh", "nginx", "python", "postgres"]
 EVENTS = [
@@ -13,11 +14,16 @@ EVENTS = [
 
 def generate_event():
     event = {
-        "time": datetime.utcnow().strftime("%H:%M:%S"),
+        "time": datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%H:%M:%S"),
         "process": random.choice(PROCESSES),
         "pid": random.randint(1000, 5000),
         "event": random.choice(EVENTS),
-        "severity": random.choice(["LOW", "MEDIUM", "HIGH"])
+        "severity": random.choices(
+                                    ["LOW", "MEDIUM", "HIGH"],
+                                    weights=[70, 20, 10],
+                                    k=1
+                                )[0]
+
     }
     return event
 

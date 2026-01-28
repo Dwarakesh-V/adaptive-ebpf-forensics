@@ -1,13 +1,97 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>MFA Verification</title>
+    <title>Multi-Factor Authentication</title>
+    <style>
+        body {
+            background: #020617;
+            color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 95vh;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .mfa-box {
+            background: #111827;
+            padding: 28px;
+            border-radius: 8px;
+            width: 360px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        h3 {
+            margin-top: 0;
+            font-weight: 600;
+        }
+
+        p {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 16px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin-bottom: 16px;
+            border-radius: 6px;
+            border: none;
+            letter-spacing: 3px;
+            text-align: center;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.95;
+        }
+
+        .note {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+        }
+    </style>
 </head>
+
 <body>
-    <h2>Multi-Factor Authentication</h2>
-    <form method="POST">
-        <input type="text" name="otp" placeholder="Enter OTP" required><br><br>
-        <button type="submit">Verify</button>
-    </form>
+
+    <div class="mfa-box">
+        <h3>Multi-Factor Authentication</h3>
+        <p>Enter the 6-digit verification code from your authenticator app.</p>
+        {% if error %}
+        <div class="alert alert-error" style = "color:red">
+            {{ error }}
+        </div>
+        <br>
+        {% endif %}
+
+        <form method="POST">
+            <input type="text" name="otp" maxlength="6" placeholder="● ● ● ● ● ●" autocomplete="off" autocorrect="off" spellcheck="false" required>
+            <button>Verify Identity</button>
+        </form>
+
+        <div class="note">
+            This extra step protects sensitive forensic data.
+        </div>
+    </div>
+
 </body>
+
 </html>

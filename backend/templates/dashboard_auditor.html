@@ -1,4 +1,10 @@
-<h2>Auditor Dashboard</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audit & Compliance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='common_style.css') }}">
+</head>
+
 <script>
     // If session expired, force login
     fetch("/dashboard", { method: "HEAD" })
@@ -7,21 +13,28 @@
         });
 </script>
 
-<form action="/view-reports" method="get">
-    <button type="submit">View Signed Reports</button>
-</form>
+<body>
 
-<form action="/verify-report" method="post">
-    <button type="submit">Verify Report Integrity</button>
-</form>
+<div class="container">
+    <button class="logout" onclick="window.location.href='/logout'">Logout</button>
+    <h2>Forensic Audit & Integrity Verification</h2>
 
-<div style="margin-top:20px; font-family: monospace;">
-    {{ output }}
+    <div class="card">
+        <form action="/view-reports" method="get">
+            <button>List Signed Evidence</button>
+        </form>
+
+        <form action="/verify-report" method="post" style="margin-top:10px;">
+            <button class="secondary">Verify Cryptographic Integrity</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <pre style="white-space:pre-wrap;">
+{{ output }}
+        </pre>
+    </div>
 </div>
-
-<form action="/logout" method="get">
-    <button type="submit">Logout</button>
-</form>
 
 <script>
     // Prevent browser back/forward navigation
@@ -32,3 +45,6 @@
         };
     }
 </script>
+
+</body>
+</html>

@@ -45,7 +45,10 @@ def login():
             session["temp_role"] = result["role"]
             return redirect(url_for("mfa"))
 
-        return "Invalid credentials"
+        return render_template(
+            "login.html",
+            error="Invalid username or password"
+        )
 
     return render_template("login.html")
 
@@ -62,7 +65,11 @@ def mfa():
             session.pop("temp_user")
             session.pop("temp_role")
             return redirect(url_for("dashboard"))
-        return "Invalid OTP"
+
+        return render_template(
+            "mfa.html",
+            error="Invalid verification code. Please try again."
+        )
 
     return render_template("mfa.html")
 
@@ -230,6 +237,10 @@ def decrypt_dump():
         "dashboard_admin.html",
         output=output
     )
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return redirect(url_for("login"))
 
 if __name__ == "__main__":
     app.run(debug=True)

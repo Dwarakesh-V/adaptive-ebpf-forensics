@@ -1,4 +1,9 @@
-<h2>Admin Dashboard</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Control Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='common_style.css') }}">
+</head>
 
 <script>
     // If session expired, force login
@@ -8,21 +13,30 @@
         });
 </script>
 
-<form action="/deploy-probes" method="post">
-    <button type="submit">Deploy eBPF Probes</button>
-</form>
+<body>
 
-<form action="/decrypt-dump" method="post">
-    <button type="submit">Decrypt Memory Dump</button>
-</form>
+<div class="container">
+    <button class="logout" onclick="window.location.href='/logout'">Logout</button>
+    <h2>System Control & Evidence Access</h2>
 
-<div style="margin-top:20px; font-family: monospace;">
-    {{ output }}
+    <div class="card">
+        <h3>Probe Management</h3>
+        <form action="/deploy-probes" method="post">
+            <button>Deploy Adaptive eBPF Probes</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3>Evidence Access</h3>
+        <form action="/decrypt-dump" method="post">
+            <button class="danger">Decrypt Memory Evidence</button>
+        </form>
+
+        <pre style="white-space:pre-wrap; margin-top:12px;">
+{{ output }}
+        </pre>
+    </div>
 </div>
-
-<form action="/logout" method="get">
-    <button type="submit">Logout</button>
-</form>
 
 <script>
     // Prevent browser back/forward navigation
@@ -33,3 +47,6 @@
         };
     }
 </script>
+
+</body>
+</html>

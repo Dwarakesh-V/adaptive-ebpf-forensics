@@ -2,69 +2,85 @@
 <html>
 
 <head>
-    <title>Investigator Dashboard</title>
-    <style>
-        #console {
-            width: 90%;
-            height: 300px;
-            border: 1px solid #333;
-            padding: 10px;
-            overflow-y: scroll;
-            font-family: monospace;
-            background-color: #f4f4f4;
-        }
-    </style>
+    <title>Investigator Console</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='common_style.css') }}">
 </head>
+
+<script>
+    // If session expired, force login
+    fetch("/dashboard", { method: "HEAD" })
+        .catch(() => {
+            window.location.href = "/";
+        });
+</script>
 
 <body>
 
-    <script>
-        // If session expired, force login
-        fetch("/dashboard", { method: "HEAD" })
-            .catch(() => {
-                window.location.href = "/";
-            });
-    </script>
+    <div class="container">
+        <button class="logout" onclick="window.location.href='/logout'">Logout</button>
+        <h2>Live Memory Forensics Console</h2>
 
+        <div class="card">
+            <button onclick="startStream()">Start Live Capture</button>
+            <button class="secondary" onclick="clearConsole()">Clear View</button>
+            <button class="secondary" onclick="filterSeverity('HIGH')">High Only</button>
+            <button class="secondary" onclick="filterSeverity('ALL')">Show All</button>
+        </div>
 
-    <h2>Investigator Dashboard</h2>
+        <div class="card">
+            <div id="console"
+                style="height:300px; overflow-y:auto; font-family:monospace; background:#020617; padding:12px;">
+            </div>
+        </div>
 
-    <button onclick="startStream()">View Live Memory Events</button>
-
-    <div id="console"></div>
-
-    <form action="/generate-report" method="post">
-        <br>
-        <button type="submit">Generate Forensic Report</button>
-    </form>
-
-    <p>{{ message }}</p>
+        <div class="card">
+            <form action="/generate-report" method="post">
+                <button class="danger">Generate Encrypted Forensic Snapshot</button>
+            </form>
+            <p>{{ message }}</p>
+        </div>
+    </div>
 
     <script>
         let source;
+        let currentFilter = "ALL";
 
         function startStream() {
             if (source) return;
-
             source = new EventSource("/live-stream");
 
             source.onmessage = function (event) {
                 const data = JSON.parse(event.data);
-                const line =
-                    "[" + data.time + "] " +
-                    "PID " + data.pid + " (" + data.process + ") → " +
-                    data.event + " | Severity: " + data.severity;
+                if (currentFilter !== "ALL" && data.severity !== currentFilter) return;
+
+                const severityClass =
+                    data.severity === "HIGH" ? "high" :
+                        data.severity === "MEDIUM" ? "medium" : "low";
+
+                const line = `
+                <div>
+                    [${data.time}] PID ${data.pid} (${data.process})
+                    <span class="badge ${severityClass}">
+                        ${data.severity}
+                    </span>
+                    → ${data.event}
+                </div>
+            `;
 
                 const consoleDiv = document.getElementById("console");
-                consoleDiv.innerHTML += line + "<br>";
+                consoleDiv.innerHTML += line;
                 consoleDiv.scrollTop = consoleDiv.scrollHeight;
             };
         }
-    </script>
 
-    <form action="/logout" method="get">
-        <button type="submit">Logout</button>
-    </form>
+        function clearConsole() {
+            document.getElementById("console").innerHTML = "";
+        }
+
+        function filterSeverity(level) {
+            currentFilter = level;
+        }
+    </script>
 
     <script>
         // Prevent browser back/forward navigation
