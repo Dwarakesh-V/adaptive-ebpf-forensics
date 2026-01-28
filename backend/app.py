@@ -1,7 +1,5 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from auth.login import login_user, verify_mfa
-from auth.password_hash import create_user
-import sqlite3
 import json
 from flask import Response
 from ebpf.live_generator import event_stream
@@ -10,7 +8,29 @@ from crypto.signature import sign_data, verify_signature
 from crypto.aes_crypto import decrypt_data
 import os
 
+LIVE_EVENT_BUFFER = []
+
 app = Flask(__name__)
+
+@app.before_request
+def enforce_login():
+    allowed_routes = ["login", "mfa", "static"]
+    if request.endpoint not in allowed_routes:
+        if "user" not in session:
+            return redirect(url_for("login"))
+
+@app.after_request
+def disable_cache(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
 app.secret_key = "super_secret_demo_key"
 
 @app.route("/", methods=["GET", "POST"])
@@ -85,7 +105,7 @@ def deploy_probes():
     # Synthetic deployment logic
     return render_template(
         "dashboard_admin.html",
-        message="eBPF probes successfully deployed with adaptive configuration."
+        output="eBPF probes successfully deployed with adaptive configuration."
     )
 
 
@@ -109,8 +129,15 @@ def generate_report():
         return "Access denied"
 
     # Synthetic memory dump
-    dump_data = b"Live memory snapshot: suspicious heap activity detected"
+    dump_text = ""
+    for e in LIVE_EVENT_BUFFER:
+        dump_text += (
+            f"[{e['time']}] "
+            f"PID {e['pid']} ({e['process']}) -> "
+            f"{e['event']} | Severity: {e['severity']}\n"
+        )
 
+    dump_data = dump_text.encode()
     encrypted_dump, aes_key, iv = encrypt_data(dump_data)
 
     signature = sign_data(encrypted_dump)
@@ -164,8 +191,8 @@ def verify_report():
     msg = "Integrity verified. Signature valid." if valid else "Integrity check failed."
 
     return render_template(
-        "dashboard_auditor.html",
-        message=msg
+    "dashboard_auditor.html",
+    output=msg
     )
 
 @app.route("/live-stream")
@@ -174,7 +201,7 @@ def live_stream():
         return "Access denied"
 
     return Response(
-        event_stream(),
+        event_stream(LIVE_EVENT_BUFFER),
         mimetype="text/event-stream"
     )
 

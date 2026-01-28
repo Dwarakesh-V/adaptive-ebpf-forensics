@@ -21,8 +21,9 @@ def generate_event():
     }
     return event
 
-def event_stream():
+def event_stream(buffer):
     while True:
         event = generate_event()
+        buffer.append(event)
         yield f"data: {json.dumps(event)}\n\n"
         time.sleep(1)

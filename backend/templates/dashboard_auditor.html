@@ -1,4 +1,11 @@
 <h2>Auditor Dashboard</h2>
+<script>
+    // If session expired, force login
+    fetch("/dashboard", { method: "HEAD" })
+        .catch(() => {
+            window.location.href = "/";
+        });
+</script>
 
 <form action="/view-reports" method="get">
     <button type="submit">View Signed Reports</button>
@@ -11,3 +18,17 @@
 <div style="margin-top:20px; font-family: monospace;">
     {{ output }}
 </div>
+
+<form action="/logout" method="get">
+    <button type="submit">Logout</button>
+</form>
+
+<script>
+    // Prevent browser back/forward navigation
+    if (window.history && window.history.pushState) {
+        window.history.pushState(null, "", window.location.href);
+        window.onpopstate = function () {
+            window.location.href = "/";
+        };
+    }
+</script>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Investigator Dashboard</title>
     <style>
@@ -14,42 +15,67 @@
         }
     </style>
 </head>
+
 <body>
 
-<h2>Investigator Dashboard</h2>
+    <script>
+        // If session expired, force login
+        fetch("/dashboard", { method: "HEAD" })
+            .catch(() => {
+                window.location.href = "/";
+            });
+    </script>
 
-<button onclick="startStream()">View Live Memory Events</button>
 
-<div id="console"></div>
+    <h2>Investigator Dashboard</h2>
 
-<form action="/generate-report" method="post">
-    <br>
-    <button type="submit">Generate Forensic Report</button>
-</form>
+    <button onclick="startStream()">View Live Memory Events</button>
 
-<p>{{ message }}</p>
+    <div id="console"></div>
 
-<script>
-    let source;
+    <form action="/generate-report" method="post">
+        <br>
+        <button type="submit">Generate Forensic Report</button>
+    </form>
 
-    function startStream() {
-        if (source) return;
+    <p>{{ message }}</p>
 
-        source = new EventSource("/live-stream");
+    <script>
+        let source;
 
-        source.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            const line =
-                "[" + data.time + "] " +
-                "PID " + data.pid + " (" + data.process + ") → " +
-                data.event + " | Severity: " + data.severity;
+        function startStream() {
+            if (source) return;
 
-            const consoleDiv = document.getElementById("console");
-            consoleDiv.innerHTML += line + "<br>";
-            consoleDiv.scrollTop = consoleDiv.scrollHeight;
-        };
-    }
-</script>
+            source = new EventSource("/live-stream");
+
+            source.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                const line =
+                    "[" + data.time + "] " +
+                    "PID " + data.pid + " (" + data.process + ") → " +
+                    data.event + " | Severity: " + data.severity;
+
+                const consoleDiv = document.getElementById("console");
+                consoleDiv.innerHTML += line + "<br>";
+                consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            };
+        }
+    </script>
+
+    <form action="/logout" method="get">
+        <button type="submit">Logout</button>
+    </form>
+
+    <script>
+        // Prevent browser back/forward navigation
+        if (window.history && window.history.pushState) {
+            window.history.pushState(null, "", window.location.href);
+            window.onpopstate = function () {
+                window.location.href = "/";
+            };
+        }
+    </script>
 
 </body>
+
 </html>
