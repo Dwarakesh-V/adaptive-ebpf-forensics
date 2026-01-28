@@ -1,5 +1,11 @@
 <h2>Investigator Dashboard</h2>
-<ul>
-    <li>View Live Memory Events</li>
-    <li>Generate Forensic Report</li>
-</ul>
+
+<form action="/memory-events" method="get">
+    <button type="submit">View Live Memory Events</button>
+</form>
+
+<form action="/generate-report" method="post">
+    <button type="submit">Generate Forensic Report</button>
+</form>
+
+<p>{{ message }}</p>

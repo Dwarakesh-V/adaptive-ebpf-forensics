@@ -1,6 +1,11 @@
 <h2>Admin Dashboard</h2>
-<ul>
-    <li>Deploy eBPF Probes</li>
-    <li>View All Memory Dumps</li>
-    <li>Manage Users</li>
-</ul>
+
+<form action="/deploy-probes" method="post">
+    <button type="submit">Deploy eBPF Probes</button>
+</form>
+
+<form action="/view-dumps" method="get">
+    <button type="submit">View Memory Dumps</button>
+</form>
+
+<p>{{ message }}</p>

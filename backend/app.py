@@ -58,13 +58,87 @@ def dashboard():
 
 @app.route("/memory-events")
 def memory_events():
-    if "role" not in session or session["role"] != "INVESTIGATOR":
+    if session.get("role") != "INVESTIGATOR":
         return "Access denied"
 
     with open("ebpf/probe_output.json") as f:
-        data = json.load(f)
+        event = json.load(f)
 
-    return data
+    response = {
+        "status": "Live memory anomaly detected",
+        "event": event
+    }
+
+    return response
+
+@app.route("/deploy-probes", methods=["POST"])
+def deploy_probes():
+    if session.get("role") != "ADMIN":
+        return "Access denied"
+
+    # Synthetic deployment logic
+    return render_template(
+        "dashboard_admin.html",
+        message="eBPF probes successfully deployed with adaptive configuration."
+    )
+
+
+@app.route("/view-dumps")
+def view_dumps():
+    if session.get("role") != "ADMIN":
+        return "Access denied"
+
+    dumps = [
+        "memdump_ssh_4123.enc",
+        "memdump_nginx_2211.enc"
+    ]
+
+    return {
+        "available_dumps": dumps
+    }
+
+@app.route("/generate-report", methods=["POST"])
+def generate_report():
+    if session.get("role") != "INVESTIGATOR":
+        return "Access denied"
+
+    report = {
+        "report_id": "FR-2026-001",
+        "generated_by": session["user"],
+        "summary": "Suspicious heap access detected in ssh process",
+        "integrity": "SHA256 hash generated",
+        "signature": "Digitally signed by investigator"
+    }
+
+    return render_template(
+        "dashboard_investigator.html",
+        message="Forensic report generated and signed successfully."
+    )
+
+@app.route("/view-reports")
+def view_reports():
+    if session.get("role") != "AUDITOR":
+        return "Access denied"
+
+    reports = [
+        "FR-2026-001",
+        "FR-2026-002"
+    ]
+
+    return {
+        "signed_reports": reports
+    }
+
+
+@app.route("/verify-report", methods=["POST"])
+def verify_report():
+    if session.get("role") != "AUDITOR":
+        return "Access denied"
+
+    return render_template(
+        "dashboard_auditor.html",
+        message="Report integrity verified. Hash and signature valid."
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

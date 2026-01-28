@@ -1,5 +1,11 @@
 <h2>Auditor Dashboard</h2>
-<ul>
-    <li>View Signed Reports</li>
-    <li>Verify Integrity</li>
-</ul>
+
+<form action="/view-reports" method="get">
+    <button type="submit">View Signed Reports</button>
+</form>
+
+<form action="/verify-report" method="post">
+    <button type="submit">Verify Report Integrity</button>
+</form>
+
+<p>{{ message }}</p>
