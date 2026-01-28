@@ -1,3 +1,8 @@
 .venv
 **/__pycache__
 users.db
+**.pem
+**.enc
+**.sig
+**.iv
+**.key

@@ -3,6 +3,12 @@ from auth.login import login_user, verify_mfa
 from auth.password_hash import create_user
 import sqlite3
 import json
+from flask import Response
+from ebpf.live_generator import event_stream
+from crypto.aes_crypto import encrypt_data
+from crypto.signature import sign_data, verify_signature
+from crypto.aes_crypto import decrypt_data
+import os
 
 app = Flask(__name__)
 app.secret_key = "super_secret_demo_key"
@@ -102,17 +108,28 @@ def generate_report():
     if session.get("role") != "INVESTIGATOR":
         return "Access denied"
 
-    report = {
-        "report_id": "FR-2026-001",
-        "generated_by": session["user"],
-        "summary": "Suspicious heap access detected in ssh process",
-        "integrity": "SHA256 hash generated",
-        "signature": "Digitally signed by investigator"
-    }
+    # Synthetic memory dump
+    dump_data = b"Live memory snapshot: suspicious heap activity detected"
+
+    encrypted_dump, aes_key, iv = encrypt_data(dump_data)
+
+    signature = sign_data(encrypted_dump)
+
+    with open("storage/encrypted_dumps/dump.enc", "wb") as f:
+        f.write(encrypted_dump)
+
+    with open("storage/encrypted_dumps/aes.key", "wb") as f:
+        f.write(aes_key)
+
+    with open("storage/encrypted_dumps/aes.iv", "wb") as f:
+        f.write(iv)
+
+    with open("storage/signatures/dump.sig", "wb") as f:
+        f.write(signature)
 
     return render_template(
         "dashboard_investigator.html",
-        message="Forensic report generated and signed successfully."
+        message="Memory dump encrypted with AES and digitally signed successfully."
     )
 
 @app.route("/view-reports")
@@ -120,24 +137,71 @@ def view_reports():
     if session.get("role") != "AUDITOR":
         return "Access denied"
 
-    reports = [
-        "FR-2026-001",
-        "FR-2026-002"
-    ]
+    output = (
+        "Signed Forensic Reports:\n"
+        "- dump.enc (AES-encrypted)\n"
+        "- dump.sig (Digital Signature)\n"
+    )
 
-    return {
-        "signed_reports": reports
-    }
-
+    return render_template(
+        "dashboard_auditor.html",
+        output=output
+    )
 
 @app.route("/verify-report", methods=["POST"])
 def verify_report():
     if session.get("role") != "AUDITOR":
         return "Access denied"
 
+    with open("storage/encrypted_dumps/dump.enc", "rb") as f:
+        encrypted_dump = f.read()
+
+    with open("storage/signatures/dump.sig", "rb") as f:
+        signature = f.read()
+
+    valid = verify_signature(encrypted_dump, signature)
+
+    msg = "Integrity verified. Signature valid." if valid else "Integrity check failed."
+
     return render_template(
         "dashboard_auditor.html",
-        message="Report integrity verified. Hash and signature valid."
+        message=msg
+    )
+
+@app.route("/live-stream")
+def live_stream():
+    if session.get("role") != "INVESTIGATOR":
+        return "Access denied"
+
+    return Response(
+        event_stream(),
+        mimetype="text/event-stream"
+    )
+
+@app.route("/decrypt-dump", methods=["POST"])
+def decrypt_dump():
+    if session.get("role") != "ADMIN":
+        return "Access denied"
+
+    with open("storage/encrypted_dumps/dump.enc", "rb") as f:
+        encrypted_dump = f.read()
+
+    with open("storage/encrypted_dumps/aes.key", "rb") as f:
+        key = f.read()
+
+    with open("storage/encrypted_dumps/aes.iv", "rb") as f:
+        iv = f.read()
+
+    plaintext = decrypt_data(encrypted_dump, key, iv)
+
+    output = (
+        "Decrypted Memory Dump:\n\n"
+        + plaintext.decode()
+    )
+
+    return render_template(
+        "dashboard_admin.html",
+        output=output
     )
 
 if __name__ == "__main__":

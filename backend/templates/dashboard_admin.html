@@ -4,8 +4,10 @@
     <button type="submit">Deploy eBPF Probes</button>
 </form>
 
-<form action="/view-dumps" method="get">
-    <button type="submit">View Memory Dumps</button>
+<form action="/decrypt-dump" method="post">
+    <button type="submit">Decrypt Memory Dump</button>
 </form>
 
-<p>{{ message }}</p>
+<div style="margin-top:20px; font-family: monospace;">
+    {{ output }}
+</div>

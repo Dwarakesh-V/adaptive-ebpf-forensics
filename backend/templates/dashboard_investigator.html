@@ -1,11 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Investigator Dashboard</title>
+    <style>
+        #console {
+            width: 90%;
+            height: 300px;
+            border: 1px solid #333;
+            padding: 10px;
+            overflow-y: scroll;
+            font-family: monospace;
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+
 <h2>Investigator Dashboard</h2>
 
-<form action="/memory-events" method="get">
-    <button type="submit">View Live Memory Events</button>
-</form>
+<button onclick="startStream()">View Live Memory Events</button>
+
+<div id="console"></div>
 
 <form action="/generate-report" method="post">
+    <br>
     <button type="submit">Generate Forensic Report</button>
 </form>
 
 <p>{{ message }}</p>
+
+<script>
+    let source;
+
+    function startStream() {
+        if (source) return;
+
+        source = new EventSource("/live-stream");
+
+        source.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const line =
+                "[" + data.time + "] " +
+                "PID " + data.pid + " (" + data.process + ") → " +
+                data.event + " | Severity: " + data.severity;
+
+            const consoleDiv = document.getElementById("console");
+            consoleDiv.innerHTML += line + "<br>";
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        };
+    }
+</script>
+
+</body>
+</html>
