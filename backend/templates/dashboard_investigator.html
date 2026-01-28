@@ -43,6 +43,17 @@
                 <button class="danger">Generate Encrypted Forensic Snapshot</button>
             </form>
             <p>{{ message }}</p>
+
+            {% if message %}
+            <div class="card">
+                <h3>Forensic Report QR Code</h3>
+                <p style="color:#9ca3af;">
+                    Scan this QR code to view encoded forensic metadata.
+                </p>
+                <img src="/static/report_qr.png" width="200">
+            </div>
+            {% endif %}
+
         </div>
     </div>
 

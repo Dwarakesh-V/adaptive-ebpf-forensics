@@ -4,3 +4,4 @@ bcrypt==4.0.1
 pyotp==2.9.0
 cryptography==41.0.7
 qrcode[pil]
+pyzbar==0.1.9
