@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-01-28T09:45:00Z",
+  "process_name": "ssh",
+  "pid": 4123,
+  "memory_region": "heap",
+  "event_type": "out_of_bounds_read",
+  "severity": "HIGH",
+  "details": {
+    "address": "0x7ffdf12a",
+    "size": 4096,
+    "description": "Suspicious heap access pattern detected"
+  }
+}

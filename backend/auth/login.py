@@ -13,14 +13,17 @@ def login_user(username, password):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT password FROM users WHERE username=?",
+        "SELECT password, role FROM users WHERE username=?",
         (username,)
     )
     row = cursor.fetchone()
     conn.close()
 
     if row and verify_password(password, row[0]):
-        return {"status": "MFA_REQUIRED"}
+        return {
+            "status": "MFA_REQUIRED",
+            "role": row[1]
+        }
 
     return {"status": "FAIL"}
 
